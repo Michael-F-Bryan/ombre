@@ -1,5 +1,6 @@
 [workspace]
 members = ["crates/*"]
+resolver = "2"
 
 [workspace.package]
 authors = ["Michael-F-Bryan <michaelfbryan@gmail.com>"]
@@ -8,5 +9,5 @@ homepage = "https://github.com/Michael-F-Bryan/shadgen.git"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/Michael-F-Bryan/shadgen.git"
-rust-version = "1.67.0"
+rust-version = "1.70.0"
 version = "0.1.0"

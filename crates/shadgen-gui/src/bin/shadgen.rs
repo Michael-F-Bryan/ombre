@@ -1,1 +1,60 @@
-fn main() {}
+use std::fs::File;
+
+use anyhow::{Context, Error};
+use clap::Parser;
+use iced::{Application as _, Settings};
+use shadgen_gui::Application;
+use tracing::metadata::LevelFilter;
+use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter};
+
+fn main() -> Result<(), Error> {
+    initialize_logging()?;
+
+    let Args {} = Args::parse();
+
+    tracing::info!("Started");
+    let _guard = tracing::info_span!("running").entered();
+
+    Application::run(Settings::default())?;
+
+    Ok(())
+}
+
+#[derive(Debug, clap::Parser)]
+#[clap(version, about, author)]
+struct Args {}
+
+fn initialize_logging() -> Result<(), Error> {
+    const SPAMMERS: &[&str] = &["wgpu_hal", "iced_native", "iced_wgpu", "wgpu_core"];
+
+    let is_interactive = atty::is(atty::Stream::Stderr);
+    let filter = EnvFilter::builder()
+        .with_default_directive(LevelFilter::INFO.into())
+        .from_env_lossy();
+    let filter = SPAMMERS.iter().fold(filter, |filter, s| {
+        filter.add_directive(format!("{s}=warn").parse().unwrap())
+    });
+
+    let fmt = tracing_subscriber::fmt()
+        .with_span_events(FmtSpan::CLOSE)
+        .with_env_filter(filter);
+
+    if is_interactive {
+        fmt.with_writer(std::io::stderr).init();
+    } else {
+        let log_file = shadgen_gui::log_file();
+        if let Some(parent) = log_file.parent() {
+            std::fs::create_dir_all(parent)
+                .with_context(|| format!("Unable to create \"{}\"", parent.display()))?;
+        }
+
+        let f = File::options()
+            .append(true)
+            .create(true)
+            .open(&log_file)
+            .with_context(|| format!("Unable to open \"{}\" for writing", log_file.display()))?;
+        fmt.with_writer(f).json().init();
+    }
+
+    Ok(())
+}
