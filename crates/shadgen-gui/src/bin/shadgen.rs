@@ -15,7 +15,11 @@ fn main() -> Result<(), Error> {
     tracing::info!("Started");
     let _guard = tracing::info_span!("running").entered();
 
-    Application::run(Settings::default())?;
+    let settings = Settings {
+        exit_on_close_request: false,
+        ..Default::default()
+    };
+    Application::run(settings)?;
 
     Ok(())
 }
