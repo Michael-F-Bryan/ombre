@@ -59,7 +59,7 @@ jobs:
           command: xtask dist
       - name: Upload Release Artifact
         run:
-          gh release upload ${TAG_NAME#refs/tags/} ./target/transcriptio.*.zip
+          gh release upload ${TAG_NAME#refs/tags/} ./target/${{ env.DEFAULT_CRATE_NAME }}.*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_GH_TOKEN }}
           TAG_NAME: ${{ github.ref }}
