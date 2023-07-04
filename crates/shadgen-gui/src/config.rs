@@ -4,7 +4,7 @@ use once_cell::sync::Lazy;
 use std::path::{Path, PathBuf};
 
 pub static DIRECTORIES: Lazy<ProjectDirs> =
-    Lazy::new(|| ProjectDirs::from("com", "michaelfbryan", env!("CARGO_PKG_NAME")).unwrap());
+    Lazy::new(|| ProjectDirs::from("com", "michaelfbryan", "shadgen").unwrap());
 
 pub fn log_file() -> PathBuf {
     DIRECTORIES.data_local_dir().join("shadgen.log")
@@ -20,7 +20,7 @@ impl Config {
         match std::fs::read_to_string(path) {
             Ok(cfg) => toml::from_str(&cfg).context("Unable to deserialize the config"),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-                // the config file doesn't exist
+                tracing::info!("No config file found. Falling back to the default.");
                 Ok(Config::default())
             }
             Err(other) => {

@@ -18,27 +18,34 @@ impl iced::Application for Application {
     type Flags = Flags;
 
     fn new(flags: Flags) -> (Self, Command<Message>) {
+        let mut logs = Logs::default();
+        logs.push("Started");
+
         let config_file = flags.config_dir.join("shadgen.toml");
         let cfg = match Config::load(&config_file) {
-            Ok(c) => c,
+            Ok(config) => {
+                tracing::debug!(path=%config_file.display(), "Loaded config");
+                tracing::trace!(?config);
+                config
+            }
             Err(e) => {
                 tracing::error!(
                     path=%config_file.display(),
                     error=&*e,
                     "Unable to load the config file",
                 );
+                logs.push(format!("Unable to load the config file: {e}"));
                 Config::default()
             }
         };
 
-        let mut app = Application {
-            logs: Logs::default(),
+        let app = Application {
+            logs,
             settings: SettingsPage::new(cfg),
             show_settings: false,
         };
 
         tracing::info!("Started");
-        app.logs.push("Started");
 
         (app, Command::none())
     }
@@ -55,6 +62,10 @@ impl iced::Application for Application {
                 iced::window::close()
             }
             Message::Event(_) => Command::none(),
+            Message::Log(msg) => {
+                self.logs.push(msg);
+                Command::none()
+            }
             Message::OpenSettings => {
                 self.logs.push("Opening settings");
                 self.show_settings = true;
@@ -94,6 +105,8 @@ impl iced::Application for Application {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Message {
     Event(iced::Event),
+    /// Add an event to the log viewer.
+    Log(String),
     Settings(crate::settings::Message),
     OpenSettings,
     CloseSettings,
