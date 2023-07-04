@@ -12,13 +12,12 @@ fn main() -> Result<(), Error> {
 
     let Args {} = Args::parse();
 
-    tracing::info!("Started");
-    let _guard = tracing::info_span!("running").entered();
-
     let settings = Settings {
         exit_on_close_request: false,
+        antialiasing: true,
         ..Default::default()
     };
+
     Application::run(settings)?;
 
     Ok(())
