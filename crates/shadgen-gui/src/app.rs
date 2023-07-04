@@ -1,7 +1,11 @@
-use iced::{subscription, widget::text, Command, Subscription, Theme};
+use iced::{subscription, widget, Command, Length, Renderer, Subscription, Theme};
+
+use crate::logs::Logs;
 
 #[derive(Debug, Default)]
-pub struct Application {}
+pub struct Application {
+    logs: Logs,
+}
 
 impl iced::Application for Application {
     type Executor = iced::executor::Default;
@@ -10,7 +14,9 @@ impl iced::Application for Application {
     type Flags = ();
 
     fn new(_flags: ()) -> (Self, Command<Message>) {
-        (Application::default(), Command::none())
+        let mut app = Application::default();
+        app.logs.push("Started");
+        (app, Command::none())
     }
 
     fn title(&self) -> String {
@@ -22,14 +28,23 @@ impl iced::Application for Application {
         match message {
             Message::Event(iced::Event::Window(iced::window::Event::CloseRequested)) => {
                 tracing::info!("Shutting down");
-                iced::window::close()
+                return iced::window::close();
             }
-            _ => Command::none(),
+            Message::Event(_) => {}
+            Message::Clicked => {
+                self.logs.push("Clicked!");
+            }
         }
+
+        Command::none()
     }
 
-    fn view(&self) -> iced::Element<'_, Message, iced::Renderer<Theme>> {
-        text("Hello, World!").into()
+    fn view(&self) -> iced::Element<'_, Message, Renderer> {
+        let button = widget::button("Click Me").on_press(Message::Clicked);
+        let body = widget::container("x")
+            .height(Length::Fill)
+            .width(Length::Fill);
+        widget::column![button, body, self.logs.view(),].into()
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
@@ -40,4 +55,5 @@ impl iced::Application for Application {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Message {
     Event(iced::Event),
+    Clicked,
 }

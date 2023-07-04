@@ -1,5 +1,6 @@
 mod app;
 mod config;
+mod logs;
 
 pub use crate::{
     app::{Application, Message},
