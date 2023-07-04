@@ -1,6 +1,11 @@
 use std::path::PathBuf;
 
-use iced::{subscription, widget, Command, Length, Renderer, Subscription, Theme};
+use iced::{
+    subscription,
+    widget::{self, button},
+    Color, Command, Length, Renderer, Subscription, Theme,
+};
+use iced_aw::menu::{MenuBar, MenuTree};
 
 use crate::{config::Config, logs::Logs, modal::Modal, settings::SettingsPage};
 
@@ -57,7 +62,8 @@ impl iced::Application for Application {
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::Event(iced::Event::Window(iced::window::Event::CloseRequested)) => {
+            Message::Event(iced::Event::Window(iced::window::Event::CloseRequested))
+            | Message::Exit => {
                 tracing::info!("Shutting down");
                 iced::window::close()
             }
@@ -81,20 +87,18 @@ impl iced::Application for Application {
     }
 
     fn view(&self) -> iced::Element<'_, Message, Renderer> {
-        let menu = widget::row![widget::button("Settings").on_press(Message::OpenSettings)];
-
         let body = widget::container("x")
             .height(Length::Fill)
             .width(Length::Fill);
-        let content = widget::column![menu, body, self.logs.view()];
+        let mut content = iced::Element::from(widget::column![menu(), body, self.logs.view()]);
 
         if self.show_settings {
-            Modal::new(content, self.settings.view().map(Message::Settings))
+            content = Modal::new(content, self.settings.view().map(Message::Settings))
                 .on_blur(Message::CloseSettings)
-                .into()
-        } else {
-            content.into()
+                .into();
         }
+
+        content
     }
 
     fn subscription(&self) -> Subscription<Self::Message> {
@@ -110,6 +114,7 @@ pub enum Message {
     Settings(crate::settings::Message),
     OpenSettings,
     CloseSettings,
+    Exit,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -123,4 +128,63 @@ impl Default for Flags {
             config_dir: crate::DIRECTORIES.config_dir().to_path_buf(),
         }
     }
+}
+
+fn menu() -> iced::Element<'static, Message, Renderer> {
+    let file_menu = MenuTree::with_children(
+        widget::container(widget::text("File"))
+            .padding([4, 8])
+            .style(menu_button_style as fn(&Theme) -> _),
+        vec![
+            MenuTree::new(base_button("Settings", Message::OpenSettings)),
+            MenuTree::new(base_button("Quit", Message::Exit)),
+        ],
+    );
+
+    MenuBar::new(vec![file_menu]).width(Length::Fill).into()
+}
+
+fn menu_button_style(theme: &Theme) -> widget::container::Appearance {
+    let palette = theme.extended_palette();
+
+    widget::container::Appearance {
+        background: Some(palette.background.weak.color.into()),
+        border_color: palette.background.strong.color,
+        ..Default::default()
+    }
+}
+
+struct ButtonStyle;
+
+impl button::StyleSheet for ButtonStyle {
+    type Style = iced::Theme;
+
+    fn active(&self, style: &Self::Style) -> button::Appearance {
+        button::Appearance {
+            text_color: style.extended_palette().background.base.text,
+            border_radius: 4.0,
+            background: Some(Color::TRANSPARENT.into()),
+            ..Default::default()
+        }
+    }
+
+    fn hovered(&self, style: &Self::Style) -> button::Appearance {
+        let plt = style.extended_palette();
+
+        button::Appearance {
+            background: Some(plt.primary.weak.color.into()),
+            text_color: plt.primary.weak.text,
+            ..self.active(style)
+        }
+    }
+}
+
+fn base_button<'a>(
+    content: impl Into<iced::Element<'a, Message, iced::Renderer>>,
+    msg: Message,
+) -> button::Button<'a, Message, iced::Renderer> {
+    button(content)
+        .padding([4, 8])
+        .style(iced::theme::Button::Custom(Box::new(ButtonStyle)))
+        .on_press(msg)
 }
