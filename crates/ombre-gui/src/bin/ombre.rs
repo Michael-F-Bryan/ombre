@@ -3,7 +3,7 @@ use std::fs::File;
 use anyhow::{Context, Error};
 use clap::Parser;
 use iced::{Application as _, Settings};
-use shadgen_gui::{Application, Flags};
+use ombre_gui::{Application, Flags};
 use tracing::metadata::LevelFilter;
 use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter};
 
@@ -46,7 +46,7 @@ fn initialize_logging() -> Result<(), Error> {
     if is_interactive {
         fmt.with_writer(std::io::stderr).init();
     } else {
-        let log_file = shadgen_gui::log_file();
+        let log_file = ombre_gui::log_file();
         if let Some(parent) = log_file.parent() {
             std::fs::create_dir_all(parent)
                 .with_context(|| format!("Unable to create \"{}\"", parent.display()))?;

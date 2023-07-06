@@ -1,5 +1,5 @@
 [package]
-name = "shadgen-gui"
+name = "ombre-gui"
 version = "0.1.0"
 authors.workspace = true
 edition.workspace = true
@@ -30,6 +30,6 @@ tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.17", features = ["env-filter", "json"] }
 
 [[bin]]
-name = "shadgen"
+name = "ombre"
 doc = false
-path = "src/bin/shadgen.rs"
+path = "src/bin/ombre.rs"

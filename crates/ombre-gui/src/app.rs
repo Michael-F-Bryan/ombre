@@ -65,7 +65,7 @@ impl iced::Application for Application {
 
     fn title(&self) -> String {
         let version = env!("CARGO_PKG_VERSION");
-        format!("Shadgen {version}")
+        format!("ombre {version}")
     }
 
     fn update(&mut self, message: Message) -> Command<Message> {

@@ -1,6 +1,6 @@
-# shadgen
+# Ombre
 
-[![Continuous integration](https://github.com/Michael-F-Bryan/shadgen/workflows/Continuous%20Integration/badge.svg?branch=main)](https://github.com/Michael-F-Bryan/shadgen/actions)
+[![Continuous integration](https://github.com/Michael-F-Bryan/ombre/workflows/Continuous%20Integration/badge.svg?branch=main)](https://github.com/Michael-F-Bryan/ombre/actions)
 
 ([API Docs][api-docs])
 
@@ -30,5 +30,5 @@ conditions.
 The intent of this crate is to be free of soundness bugs. The developers will
 do their best to avoid them, and welcome help in analysing and fixing them.
 
-[api-docs]: https://michael-f-bryan.github.io/shadgen
+[api-docs]: https://michael-f-bryan.github.io/ombre
 [crev]: https://github.com/crev-dev/cargo-crev

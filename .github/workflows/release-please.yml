@@ -8,7 +8,7 @@ on:
   repository_dispatch:
 
 env:
-  DEFAULT_CRATE_NAME: shadgen
+  DEFAULT_CRATE_NAME: ombre
   RUST_BACKTRACE: 1
 
 jobs:

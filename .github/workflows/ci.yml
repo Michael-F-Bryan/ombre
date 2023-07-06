@@ -7,7 +7,7 @@ on:
     - main
 
 env:
-  DEFAULT_CRATE_NAME: shadgen
+  DEFAULT_CRATE_NAME: ombre
 
 permissions:
   contents: write

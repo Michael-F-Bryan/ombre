@@ -5,8 +5,8 @@ resolver = "2"
 [workspace.package]
 authors = ["Michael-F-Bryan <michaelfbryan@gmail.com>"]
 edition = "2021"
-homepage = "https://github.com/Michael-F-Bryan/shadgen.git"
+homepage = "https://github.com/Michael-F-Bryan/ombre.git"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/Michael-F-Bryan/shadgen.git"
+repository = "https://github.com/Michael-F-Bryan/ombre.git"
 rust-version = "1.70.0"

@@ -9,7 +9,7 @@ use anyhow::{Context, Error};
 use once_cell::sync::Lazy;
 use zip::{write::FileOptions, ZipWriter};
 
-const BINARIES: &[&str] = &["shadgen"];
+const BINARIES: &[&str] = &["ombre"];
 const STATIC_FILES: &[&str] = &["README.md", "LICENSE_MIT.md", "LICENSE_APACHE.md"];
 static DIST_DIR: Lazy<PathBuf> = Lazy::new(|| crate::project_root().join("target/dist"));
 
@@ -36,7 +36,7 @@ impl Dist {
     fn bundle(&self) -> Result<(), Error> {
         let parent_dir = self.output_dir.parent().unwrap();
         let triple = host_triple()?;
-        let dest = parent_dir.join(format!("shadgen.{triple}.zip"));
+        let dest = parent_dir.join(format!("ombre.{triple}.zip"));
 
         let f = File::create(&dest)
             .with_context(|| format!("Unable to create \"{}\"", dest.display()))?;

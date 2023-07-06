@@ -5,10 +5,10 @@ use once_cell::sync::Lazy;
 use std::path::{Path, PathBuf};
 
 pub static DIRECTORIES: Lazy<ProjectDirs> =
-    Lazy::new(|| ProjectDirs::from("com", "michaelfbryan", "shadgen").unwrap());
+    Lazy::new(|| ProjectDirs::from("com", "michaelfbryan", "ombre").unwrap());
 
 pub fn log_file() -> PathBuf {
-    DIRECTORIES.data_local_dir().join("shadgen.log")
+    DIRECTORIES.data_local_dir().join("ombre.log")
 }
 
 #[derive(Debug, Default, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -19,7 +19,7 @@ pub struct Config {
 
 impl Config {
     pub fn filename() -> PathBuf {
-        DIRECTORIES.config_dir().join("shadgen.toml")
+        DIRECTORIES.config_dir().join("ombre.toml")
     }
 
     pub fn load(config_file: impl AsRef<Path>) -> Result<Self, Error> {

@@ -1,10 +1,10 @@
 {
   "release-type": "rust",
   "packages": {
-    "crates/shadgen": {
-      "component": "shadgen"
+    "crates/ombre": {
+      "component": "ombre"
     },
-    "crates/shadgen-gui": {
+    "crates/ombre-gui": {
       "component": "gui"
     }
   },
