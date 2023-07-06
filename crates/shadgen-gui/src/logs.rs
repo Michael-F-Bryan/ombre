@@ -6,6 +6,7 @@ use iced::{
 
 use crate::Message;
 
+/// A simple, scrollable log viewer.
 #[derive(Debug, Default, Clone, PartialEq)]
 pub(crate) struct Logs {
     logs: Vec<LogItem>,

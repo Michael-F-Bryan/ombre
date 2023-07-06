@@ -1,19 +1,23 @@
-use std::path::PathBuf;
-
 use iced::{
-    subscription,
     widget::{self, button},
-    Color, Command, Length, Renderer, Subscription, Theme,
+    Color, Command, Length, Renderer, Theme,
 };
-use iced_aw::menu::{MenuBar, MenuTree};
+use iced_aw::{
+    menu::{MenuBar, MenuTree},
+    Modal,
+};
 
-use crate::{config::Config, logs::Logs, modal::Modal, settings::SettingsPage};
+use crate::{
+    config::Config,
+    logs::Logs,
+    settings::{self, settings, SettingsState},
+};
 
 #[derive(Debug)]
 pub struct Application {
+    config: Config,
     logs: Logs,
-    settings: SettingsPage,
-    show_settings: bool,
+    settings: SettingsState,
 }
 
 impl iced::Application for Application {
@@ -22,15 +26,15 @@ impl iced::Application for Application {
     type Theme = Theme;
     type Flags = Flags;
 
-    fn new(flags: Flags) -> (Self, Command<Message>) {
+    fn new(_flags: Flags) -> (Self, Command<Message>) {
         let mut logs = Logs::default();
         logs.push("Started");
 
-        let config_file = flags.config_dir.join("shadgen.toml");
-        let cfg = match Config::load(&config_file) {
+        let config_file = Config::filename();
+        let config = match Config::load(&config_file) {
             Ok(config) => {
-                tracing::debug!(path=%config_file.display(), "Loaded config");
-                tracing::trace!(?config);
+                tracing::info!(path=%config_file.display(), "Loaded config");
+                tracing::debug!(?config);
                 config
             }
             Err(e) => {
@@ -46,8 +50,8 @@ impl iced::Application for Application {
 
         let app = Application {
             logs,
-            settings: SettingsPage::new(cfg),
-            show_settings: false,
+            settings: SettingsState::default(),
+            config,
         };
 
         tracing::info!("Started");
@@ -62,73 +66,81 @@ impl iced::Application for Application {
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match message {
-            Message::Event(iced::Event::Window(iced::window::Event::CloseRequested))
-            | Message::Exit => {
+            Message::Quit => {
                 tracing::info!("Shutting down");
-                iced::window::close()
+                return iced::window::close();
             }
-            Message::Event(_) => Command::none(),
             Message::Log(msg) => {
                 self.logs.push(msg);
-                Command::none()
             }
             Message::OpenSettings => {
                 self.logs.push("Opening settings");
-                self.show_settings = true;
-                Command::none()
+                self.settings.show(self.config.clone());
             }
-            Message::CloseSettings => {
-                self.logs.push("Closing settings");
-                self.show_settings = false;
-                Command::none()
+            Message::Settings(crate::settings::Message::SaveSettings(config)) => {
+                let config_file = Config::filename();
+                match config.save(&config_file) {
+                    Ok(_) => {
+                        tracing::info!(
+                            config.path=%config_file.display(),
+                            "Config saved",
+                        );
+                        tracing::debug!(?config);
+                        self.logs.push("Settings saved");
+                    }
+                    Err(e) => {
+                        tracing::error!(
+                            error=&*e,
+                            config.path=%config_file.display(),
+                            "Unable to save the config",
+                        );
+                        self.logs.push(format!("Unable to save settings: {e}"));
+                    }
+                }
+
+                self.config = config;
+                self.settings.close();
             }
-            Message::Settings(msg) => self.settings.update(msg).map(Message::Settings),
+            Message::Settings(crate::settings::Message::Cancel) => {
+                self.logs.push("Leaving settings unmodified");
+                self.settings.close();
+            }
+
+            Message::Settings(crate::settings::Message::Update(update)) => {
+                self.settings.update(update);
+            }
         }
+
+        Command::none()
     }
 
     fn view(&self) -> iced::Element<'_, Message, Renderer> {
-        let body = widget::container("x")
-            .height(Length::Fill)
-            .width(Length::Fill);
-        let mut content = iced::Element::from(widget::column![menu(), body, self.logs.view()]);
+        let content = iced::Element::from(widget::column![
+            menu(),
+            widget::vertical_space(Length::Fill),
+            self.logs.view()
+        ]);
 
-        if self.show_settings {
-            content = Modal::new(content, self.settings.view().map(Message::Settings))
-                .on_blur(Message::CloseSettings)
-                .into();
-        }
-
-        content
-    }
-
-    fn subscription(&self) -> Subscription<Self::Message> {
-        subscription::events().map(Message::Event)
+        Modal::new(self.settings.is_visible(), content, || {
+            settings(&self.settings).map(Message::Settings)
+        })
+        .on_esc(Message::Settings(settings::Message::Cancel))
+        .backdrop(Message::Settings(settings::Message::Cancel))
+        .into()
     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Message {
-    Event(iced::Event),
     /// Add an event to the log viewer.
     Log(String),
     Settings(crate::settings::Message),
     OpenSettings,
-    CloseSettings,
-    Exit,
+    Quit,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct Flags {
-    pub config_dir: PathBuf,
-}
-
-impl Default for Flags {
-    fn default() -> Self {
-        Self {
-            config_dir: crate::DIRECTORIES.config_dir().to_path_buf(),
-        }
-    }
-}
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct Flags {}
 
 fn menu() -> iced::Element<'static, Message, Renderer> {
     let file_menu = MenuTree::with_children(
@@ -137,11 +149,11 @@ fn menu() -> iced::Element<'static, Message, Renderer> {
             .style(menu_button_style as fn(&Theme) -> _),
         vec![
             MenuTree::new(base_button("Settings", Message::OpenSettings)),
-            MenuTree::new(base_button("Quit", Message::Exit)),
+            MenuTree::new(base_button("Quit", Message::Quit)),
         ],
     );
 
-    MenuBar::new(vec![file_menu]).width(Length::Fill).into()
+    MenuBar::new(vec![file_menu]).width(Length::Shrink).into()
 }
 
 fn menu_button_style(theme: &Theme) -> widget::container::Appearance {
@@ -154,9 +166,9 @@ fn menu_button_style(theme: &Theme) -> widget::container::Appearance {
     }
 }
 
-struct ButtonStyle;
+struct MenuButtonStyle;
 
-impl button::StyleSheet for ButtonStyle {
+impl button::StyleSheet for MenuButtonStyle {
     type Style = iced::Theme;
 
     fn active(&self, style: &Self::Style) -> button::Appearance {
@@ -185,6 +197,6 @@ fn base_button<'a>(
 ) -> button::Button<'a, Message, iced::Renderer> {
     button(content)
         .padding([4, 8])
-        .style(iced::theme::Button::Custom(Box::new(ButtonStyle)))
+        .style(iced::theme::Button::Custom(Box::new(MenuButtonStyle)))
         .on_press(msg)
 }
