@@ -1,14 +1,14 @@
 use camino::Utf8PathBuf;
 use iced::{
     widget::{self, button},
-    Alignment, Length, Renderer,
+    Alignment, Length,
 };
 use iced_aw::Card;
 
-use crate::config::Config;
+use crate::{config::Config, Element};
 
 /// Render the settings page.
-pub fn settings(state: &SettingsState) -> iced::Element<'static, Message, Renderer> {
+pub fn settings(state: &SettingsState) -> Element<'static, Message> {
     let config = match &state.config {
         Some(cfg) => cfg,
         None => return widget::text("").into(),

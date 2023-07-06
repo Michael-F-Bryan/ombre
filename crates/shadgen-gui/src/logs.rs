@@ -1,10 +1,10 @@
 use chrono::{DateTime, Local};
 use iced::{
     widget::{self, container},
-    Color, Element, Length, Renderer, Theme,
+    Color, Length,
 };
 
-use crate::Message;
+use crate::{Element, Message};
 
 /// A simple, scrollable log viewer.
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -20,17 +20,17 @@ impl Logs {
         });
     }
 
-    pub fn view(&self) -> Element<'_, Message, Renderer> {
+    pub fn view(&self) -> Element<'_, Message> {
         let messages = self.logs.iter().rev().map(|msg| msg.view()).collect();
         let scroll_box = widget::scrollable(widget::column(messages));
         container(scroll_box)
-            .style(logs_style as fn(&Theme) -> _)
+            .style(logs_style as fn(&iced::Theme) -> _)
             .height(100)
             .into()
     }
 }
 
-fn logs_style(theme: &Theme) -> container::Appearance {
+fn logs_style(theme: &iced::Theme) -> container::Appearance {
     let palette = theme.extended_palette();
 
     container::Appearance {
@@ -48,7 +48,7 @@ struct LogItem {
 }
 
 impl LogItem {
-    fn view(&self) -> Element<'_, Message, Renderer<Theme>> {
+    fn view(&self) -> Element<'_, Message> {
         let timestamp = widget::text(self.timestamp.format("%Y-%m-%d %H:%M:%S").to_string())
             .style(Color::BLACK);
 

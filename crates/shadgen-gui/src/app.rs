@@ -1,6 +1,6 @@
 use iced::{
     widget::{self, button},
-    Color, Command, Element, Length, Renderer, Theme,
+    Color, Command, Length,
 };
 use iced_aw::{
     menu::{MenuBar, MenuTree, PathHighlight},
@@ -12,6 +12,7 @@ use crate::{
     config::Config,
     logs::Logs,
     settings::{self, settings, SettingsState},
+    Element, Theme,
 };
 
 #[derive(Debug)]
@@ -120,7 +121,7 @@ impl iced::Application for Application {
         Command::none()
     }
 
-    fn view(&self) -> Element<'_, Message, Renderer> {
+    fn view(&self) -> Element<'_, Message> {
         let tab_bar = TabBar::new(self.active_tab, Message::SwitchTab)
             .push(TabLabel::Text("New Job".to_string()))
             .push(TabLabel::Text("History".to_string()))
@@ -131,15 +132,16 @@ impl iced::Application for Application {
             _ => unreachable!(),
         };
 
-        let content = widget::column![
-            widget::container(menu()).width(Length::Fill),
-            widget::horizontal_rule(1),
+        let content = widget::column(vec![
+            widget::container(menu()).width(Length::Fill).into(),
+            widget::horizontal_rule(1).into(),
             widget::container(tab_bar)
                 .width(Length::Fill)
-                .style(bar_style as fn(&Theme) -> _),
-            widget::container(current_tab).height(Length::Fill),
-            self.logs.view()
-        ];
+                .style(bar_style as fn(&iced::Theme) -> _)
+                .into(),
+            widget::container(current_tab).height(Length::Fill).into(),
+            self.logs.view(),
+        ]);
 
         Modal::new(self.settings.is_visible(), content, || {
             settings(&self.settings).map(Message::Settings)
@@ -150,7 +152,7 @@ impl iced::Application for Application {
     }
 }
 
-fn bar_style(theme: &Theme) -> widget::container::Appearance {
+fn bar_style(theme: &iced::Theme) -> widget::container::Appearance {
     let palette = theme.extended_palette();
     widget::container::Appearance {
         background: Some(palette.background.weak.color.into()),
@@ -172,11 +174,11 @@ pub enum Message {
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Flags {}
 
-fn menu() -> Element<'static, Message, Renderer> {
+fn menu() -> Element<'static> {
     let file_menu = MenuTree::with_children(
         widget::container(base_button("File", Message::Noop))
             .padding([4, 8])
-            .style(menu_button_style as fn(&Theme) -> _),
+            .style(menu_button_style as fn(&iced::Theme) -> _),
         vec![
             MenuTree::new(base_button("Settings", Message::OpenSettings)),
             MenuTree::new(base_button("Quit", Message::Quit)),
@@ -189,7 +191,7 @@ fn menu() -> Element<'static, Message, Renderer> {
         .into()
 }
 
-fn menu_button_style(theme: &Theme) -> widget::container::Appearance {
+fn menu_button_style(theme: &iced::Theme) -> widget::container::Appearance {
     let palette = theme.extended_palette();
 
     widget::container::Appearance {
@@ -230,9 +232,9 @@ impl button::StyleSheet for MenuButtonStyle {
 }
 
 fn base_button<'a>(
-    content: impl Into<iced::Element<'a, Message, iced::Renderer>>,
+    content: impl Into<Element<'a>>,
     msg: Message,
-) -> button::Button<'a, Message, iced::Renderer> {
+) -> button::Button<'a, Message, iced::Renderer<Theme>> {
     button(content)
         .padding([4, 8])
         .style(iced::theme::Button::Custom(Box::new(MenuButtonStyle)))
