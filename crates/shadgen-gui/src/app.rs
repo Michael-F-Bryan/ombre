@@ -1,9 +1,10 @@
 use iced::{
     widget::{self, button},
-    Color, Command, Length, Renderer, Theme,
+    Color, Command, Element, Length, Renderer, Theme,
 };
 use iced_aw::{
-    menu::{MenuBar, MenuTree},
+    menu::{MenuBar, MenuTree, PathHighlight},
+    tab_bar::{TabBar, TabLabel},
     Modal,
 };
 
@@ -15,6 +16,7 @@ use crate::{
 
 #[derive(Debug)]
 pub struct Application {
+    active_tab: usize,
     config: Config,
     logs: Logs,
     settings: SettingsState,
@@ -49,6 +51,7 @@ impl iced::Application for Application {
         };
 
         let app = Application {
+            active_tab: 0,
             logs,
             settings: SettingsState::default(),
             config,
@@ -105,21 +108,38 @@ impl iced::Application for Application {
                 self.logs.push("Leaving settings unmodified");
                 self.settings.close();
             }
-
             Message::Settings(crate::settings::Message::Update(update)) => {
                 self.settings.update(update);
             }
+            Message::SwitchTab(tab) => {
+                self.active_tab = tab;
+            }
+            Message::Noop => {}
         }
 
         Command::none()
     }
 
-    fn view(&self) -> iced::Element<'_, Message, Renderer> {
-        let content = iced::Element::from(widget::column![
-            menu(),
-            widget::vertical_space(Length::Fill),
+    fn view(&self) -> Element<'_, Message, Renderer> {
+        let tab_bar = TabBar::new(self.active_tab, Message::SwitchTab)
+            .push(TabLabel::Text("New Job".to_string()))
+            .push(TabLabel::Text("History".to_string()))
+            .tab_width(Length::Shrink);
+        let current_tab = match self.active_tab {
+            0 => Element::from(widget::vertical_space(Length::Fill)),
+            1 => Element::from(widget::text("asdf")),
+            _ => unreachable!(),
+        };
+
+        let content = widget::column![
+            widget::container(menu()).width(Length::Fill),
+            widget::horizontal_rule(1),
+            widget::container(tab_bar)
+                .width(Length::Fill)
+                .style(bar_style as fn(&Theme) -> _),
+            widget::container(current_tab).height(Length::Fill),
             self.logs.view()
-        ]);
+        ];
 
         Modal::new(self.settings.is_visible(), content, || {
             settings(&self.settings).map(Message::Settings)
@@ -130,6 +150,14 @@ impl iced::Application for Application {
     }
 }
 
+fn bar_style(theme: &Theme) -> widget::container::Appearance {
+    let palette = theme.extended_palette();
+    widget::container::Appearance {
+        background: Some(palette.background.weak.color.into()),
+        ..Default::default()
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Message {
     /// Add an event to the log viewer.
@@ -137,14 +165,16 @@ pub enum Message {
     Settings(crate::settings::Message),
     OpenSettings,
     Quit,
+    SwitchTab(usize),
+    Noop,
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Flags {}
 
-fn menu() -> iced::Element<'static, Message, Renderer> {
+fn menu() -> Element<'static, Message, Renderer> {
     let file_menu = MenuTree::with_children(
-        widget::container(widget::text("File"))
+        widget::container(base_button("File", Message::Noop))
             .padding([4, 8])
             .style(menu_button_style as fn(&Theme) -> _),
         vec![
@@ -153,7 +183,10 @@ fn menu() -> iced::Element<'static, Message, Renderer> {
         ],
     );
 
-    MenuBar::new(vec![file_menu]).width(Length::Shrink).into()
+    MenuBar::new(vec![file_menu])
+        .width(Length::Shrink)
+        .path_highlight(Some(PathHighlight::MenuActive))
+        .into()
 }
 
 fn menu_button_style(theme: &Theme) -> widget::container::Appearance {
@@ -172,20 +205,25 @@ impl button::StyleSheet for MenuButtonStyle {
     type Style = iced::Theme;
 
     fn active(&self, style: &Self::Style) -> button::Appearance {
+        let plt = style.extended_palette();
+
         button::Appearance {
-            text_color: style.extended_palette().background.base.text,
-            border_radius: 4.0,
+            text_color: plt.background.base.text,
             background: Some(Color::TRANSPARENT.into()),
             ..Default::default()
         }
+    }
+
+    fn disabled(&self, style: &Self::Style) -> button::Appearance {
+        self.active(style)
     }
 
     fn hovered(&self, style: &Self::Style) -> button::Appearance {
         let plt = style.extended_palette();
 
         button::Appearance {
-            background: Some(plt.primary.weak.color.into()),
-            text_color: plt.primary.weak.text,
+            background: Some(plt.background.weak.color.into()),
+            text_color: plt.background.weak.text,
             ..self.active(style)
         }
     }
@@ -199,4 +237,5 @@ fn base_button<'a>(
         .padding([4, 8])
         .style(iced::theme::Button::Custom(Box::new(MenuButtonStyle)))
         .on_press(msg)
+        .width(Length::Fill)
 }
