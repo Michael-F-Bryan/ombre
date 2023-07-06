@@ -1,5 +1,5 @@
 {
   ".": "0.0.0",
   "crates/ombre": "0.1.0",
-  "crates/ombre-cli": "0.1.0"
+  "crates/ombre-gui": "0.1.0"
 }
