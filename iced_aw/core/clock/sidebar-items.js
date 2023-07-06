@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["HOUR_RADIUS_PERCENTAGE","HOUR_RADIUS_PERCENTAGE_NO_SECONDS","MINUTE_RADIUS_PERCENTAGE","MINUTE_RADIUS_PERCENTAGE_NO_SECONDS","PERIOD_PERCENTAGE","SECOND_RADIUS_PERCENTAGE"],"enum":["NearestRadius","Period"],"fn":["circle_points","nearest_point","nearest_radius"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Subscription","Tracker"],"trait":["Recipe"]};

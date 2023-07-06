@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["color_picker","date_picker","floating_element","modal","time_picker"]};

@@ -1,0 +1,4 @@
+(function() {var implementors = {
+"glyph_brush":[],
+"wgpu_glyph":[["impl&lt;D, F: <a class=\"trait\" href=\"wgpu_glyph/ab_glyph/trait.Font.html\" title=\"trait wgpu_glyph::ab_glyph::Font\">Font</a>, H: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.70.0/core/hash/trait.BuildHasher.html\" title=\"trait core::hash::BuildHasher\">BuildHasher</a>&gt; <a class=\"trait\" href=\"wgpu_glyph/trait.GlyphCruncher.html\" title=\"trait wgpu_glyph::GlyphCruncher\">GlyphCruncher</a>&lt;F, <a class=\"struct\" href=\"wgpu_glyph/struct.Extra.html\" title=\"struct wgpu_glyph::Extra\">Extra</a>&gt; for <a class=\"struct\" href=\"wgpu_glyph/struct.GlyphBrush.html\" title=\"struct wgpu_glyph::GlyphBrush\">GlyphBrush</a>&lt;D, F, H&gt;"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

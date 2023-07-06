@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["badge","card","color_picker","cupertino","date_picker","floating_element","grid","icon_text","menu","modal","number_input","overlay","quad","selection_list","spinner","split","tab_bar","tabs","time_picker","wrap"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["ColoredVertex2D","Mesh2D","Vertex2D"]};

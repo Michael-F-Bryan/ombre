@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Message"],"fn":["log_file"],"static":["DIRECTORIES"],"struct":["Application","Flags","Theme"],"type":["Element"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ItemHeight","ItemWidth","PathHighlight"],"struct":["CloseCondition","MenuBar","MenuTree"]};

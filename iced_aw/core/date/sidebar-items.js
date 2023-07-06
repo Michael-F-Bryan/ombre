@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["IsInMonth"],"fn":["month_as_string","position_to_day","pred_day","pred_month","pred_week","pred_year","succ_day","succ_month","succ_week","succ_year","year_as_string"],"struct":["Date","MAX_MONTH_STR_LEN","WEEKDAY_LABELS"]};

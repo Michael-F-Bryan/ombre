@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Alignment","Antialiasing","Background","Error","Font","Primitive"],"mod":["alignment","backend","font","gradient","image","layer","overlay","renderer","triangle","widget","window"],"struct":["Color","Point","Rectangle","Size","Transformation","Vector","Viewport"]};

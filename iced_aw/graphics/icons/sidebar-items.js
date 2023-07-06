@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["ICON_FONT"],"enum":["Icon"],"fn":["icon_to_char"]};
